@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Personal Finance Tracker - Manage your budgets, investments, and financial goals">
+    <meta name="theme-color" content="#333899">
+    <title>Finance Manager</title>
+    <!-- Load the global theme manager script early to prevent flash of wrong theme -->
+    <script src="{{ url_for('static', filename='js/global-theme.js') }}"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block extra_css %}{% endblock %}    <style>
+        /* Ensure all elements have proper dark mode transitions */
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        /* Improve transition for cards and panels */
+        .card, .budget-panel, .dashboard-card, .stat-card {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        /* Prevent transition flickering */
+        .theme-switch, .theme-switch i {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        /* Ensure login forms have proper transitions */
+        .form-control, .btn {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+    </style>
+</head>
+<body>    <!-- Theme Toggle Indicator -->
+    <div id="theme-status" style="position: fixed; bottom: 10px; right: 10px; padding: 5px; z-index: 999; display: none; font-size: 12px; border-radius: 4px; opacity: 0.8;">
+        <span id="theme-mode-text"></span>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4 text-gradient" href="{{ url_for('main.index') }}">
+                <i class="bi bi-piggy-bank-fill me-2"></i>Finance Tracker
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+                        <!-- All Features Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="featuresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-grid-3x3-gap-fill"></i> Features
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end features-menu" aria-labelledby="featuresDropdown">
+                                <!-- Transactions & Budget Section -->
+                                <li><h6 class="dropdown-header">Transactions & Budget</h6></li>
+                                <li><a class="dropdown-item" href="{{ url_for('transactions.filter_transactions') }}">
+                                    <i class="bi bi-list-ul me-2"></i>Transactions
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('budgets.set_budget') }}">
+                                    <i class="bi bi-sliders me-2"></i>Set Budget
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('transactions.add_transaction') }}">
+                                    <i class="bi bi-plus-square me-2"></i>Add Transaction
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('transactions.budget_summary') }}">
+                                    <i class="bi bi-pie-chart me-2"></i>Budget Summary
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('transactions.transaction_report') }}">
+                                    <i class="bi bi-file-earmark-text me-2"></i>Reports & Export
+                                </a></li>
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                
+                                <!-- Goals Section -->
+                                <li><h6 class="dropdown-header">Goals</h6></li>
+                                <li><a class="dropdown-item" href="{{ url_for('goals.add_goal') }}">
+                                    <i class="bi bi-trophy me-2"></i>Add Goal
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('goals.view_goals') }}">
+                                    <i class="bi bi-list-check me-2"></i>View Goals
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('goals.goal_suggestions') }}">
+                                    <i class="bi bi-lightbulb me-2"></i>Goal Suggestions
+                                </a></li>
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                
+                                <!-- Investments Section -->
+                                <li><h6 class="dropdown-header">Investments</h6></li>
+                                <li><a class="dropdown-item" href="{{ url_for('investments.investment_dashboard') }}">
+                                    <i class="bi bi-bar-chart me-2"></i>Investment Dashboard
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('investments.add_account') }}">
+                                    <i class="bi bi-wallet me-2"></i>Add Investment Account
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('investments.portfolio_performance') }}">
+                                    <i class="bi bi-graph-up me-2"></i>Portfolio Performance
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('investments.tax_optimization') }}">
+                                    <i class="bi bi-cash-coin me-2"></i>Tax Optimizer
+                                </a></li>
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                
+                                <!-- Debt Section -->
+                                <li><h6 class="dropdown-header">Debts & Loans</h6></li>
+                                <li><a class="dropdown-item" href="{{ url_for('debts.view_debts') }}">
+                                    <i class="bi bi-cash-coin me-2"></i>View All Debts
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('debts.add_debt') }}">
+                                    <i class="bi bi-plus-circle me-2"></i>Add New Debt/Loan
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('debts.debt_history') }}">
+                                    <i class="bi bi-clock-history me-2"></i>Payment History
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('debts.debt_reminder') }}">
+                                    <i class="bi bi-bell me-2"></i>Reminders
+                                </a></li>
+                            </ul>
+                        </li>
+                        
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}">Register</a></li>
+                    {% endif %}                    <!-- Theme Toggle -->
+                    <li class="nav-item">
+                        <button type="button" class="nav-link theme-switch border-0 bg-transparent" id="themeToggle" aria-label="Toggle theme">
+                            <i class="bi bi-sun-fill" id="lightIcon" aria-hidden="true"></i>
+                            <i class="bi bi-moon-stars-fill d-none" id="darkIcon" aria-hidden="true"></i>
+                            <span class="visually-hidden">Toggle dark mode</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+        <div class="container mt-4 mb-5">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </div>    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/responsive.js') }}"></script>
+    <!-- Theme tester script - remove in production -->
+    <script src="{{ url_for('static', filename='js/theme-tester.js') }}"></script>
+    <script>
+        // Add theme test button in development only
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof addThemeTestButton === 'function') {
+                addThemeTestButton();
+            }
+        });
+    </script>    <script>
+        // Dark mode debug helper - logs theme changes and shows mode indicator
+        function showThemeHelper() {
+            const htmlEl = document.documentElement;
+            const currentTheme = htmlEl.getAttribute('data-bs-theme');
+            console.log("Current theme: " + currentTheme);
+            
+            // Show current theme mode in corner
+            const indicator = document.createElement('div');
+            indicator.style.position = 'fixed';
+            indicator.style.bottom = '5px';
+            indicator.style.left = '5px';
+            indicator.style.padding = '3px 6px';
+            indicator.style.fontSize = '11px';
+            indicator.style.zIndex = '9999';
+            indicator.style.borderRadius = '3px';
+            indicator.style.transition = 'all 0.3s ease';
+            indicator.id = 'theme-debug-indicator';
+            
+            if (currentTheme === 'dark') {
+                indicator.style.backgroundColor = 'rgba(255,255,255,0.2)';
+                indicator.style.color = 'white';
+                indicator.textContent = '🌙 Dark Mode';
+            } else {
+                indicator.style.backgroundColor = 'rgba(0,0,0,0.1)';
+                indicator.style.color = 'black';
+                indicator.textContent = '☀️ Light Mode';
+            }
+            
+            const existingIndicator = document.getElementById('theme-debug-indicator');
+            if (existingIndicator) {
+                existingIndicator.remove();
+            }
+            document.body.appendChild(indicator);
+            
+            // Fade out after 3 seconds
+            setTimeout(() => {
+                indicator.style.opacity = '0.3';
+            }, 3000);
+        }
+        
+        // Call this function on page load and whenever theme changes
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(showThemeHelper, 500);
+            
+            // Listen for theme changes
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'data-bs-theme') {
+                        showThemeHelper();
+                    }
+                });
+            });
+            
+            observer.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['data-bs-theme']
+            });
+        });
+        
+        // Function to check goal reminders
+        function checkGoalReminders() {
+            fetch('/api/goal-reminders')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.reminders && data.reminders.length > 0) {
+                        // Create and show notifications
+                        const container = document.createElement('div');
+                        container.className = 'position-fixed bottom-0 end-0 p-3';
+                        container.style.zIndex = '1050';
+
+                        data.reminders.forEach(reminder => {
+                            const toast = document.createElement('div');
+                            toast.className = 'toast show';
+                            toast.innerHTML = `
+                                <div class="toast-header bg-warning text-dark">
+                                    <strong class="me-auto">Goal Reminder</strong>
+                                    <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                                </div>
+                                <div class="toast-body">
+                                    <p><strong>${reminder.name}</strong> is due in ${reminder.days_left} days!</p>
+                                    <p>You still need $${reminder.amount_needed.toFixed(2)} to reach your goal.</p>
+                                    <div class="mt-2 pt-2 border-top">
+                                        <a href="/goals/${reminder.id}" class="btn btn-sm btn-primary">View Goal</a>
+                                    </div>
+                                </div>
+                            `;
+                            container.appendChild(toast);
+                        });
+
+                        document.body.appendChild(container);
+
+                        // Add event listeners to close buttons
+                        const closeButtons = container.querySelectorAll('.btn-close');
+                        closeButtons.forEach(button => {
+                            button.addEventListener('click', function() {
+                                const toast = this.closest('.toast');
+                                if (toast) {
+                                    toast.remove();
+                                }
+                            });
+                        });
+                    }
+                })
+                .catch(error => console.error('Error checking goal reminders:', error));
+        }
+
+        // Call checkGoalReminders when document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof checkGoalReminders === 'function') {
+                setTimeout(checkGoalReminders, 1000); // Slight delay for better UX
+            }
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer py-4 mt-auto">
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Logo and copyright -->
+                <div class="col-md-4 mb-2 mb-md-0 text-center text-md-start">
+                    <div class="d-flex align-items-center justify-content-center justify-content-md-start">
+                        <i class="bi bi-piggy-bank-fill me-2"></i>
+                        <span class="fw-bold">Finance Tracker</span>
+                    </div>
+                    <p class="small mb-0 mt-1">© 2025 All rights reserved.</p>
+                </div>
+                
+                <!-- Quick links -->
+                <div class="col-md-5 mb-2 mb-md-0">
+                    <div class="d-flex justify-content-center justify-content-md-start gap-3">
+                        <a href="{{ url_for('main.dashboard') }}" class="text-decoration-none small">Dashboard</a>
+                        <a href="{{ url_for('transactions.filter_transactions') }}" class="text-decoration-none small">Transactions</a>
+                        <a href="{{ url_for('goals.view_goals') }}" class="text-decoration-none small">Goals</a>
+                        <a href="#" class="text-decoration-none small">Help</a>
+                    </div>
+                </div>
+                
+                <!-- Social links -->
+                <div class="col-md-3 text-center text-md-end">
+                    <div class="d-flex gap-3 justify-content-center justify-content-md-end">
+                        <a href="#" class="text-decoration-none"><i class="bi bi-facebook social-icon"></i></a>
+                        <a href="#" class="text-decoration-none"><i class="bi bi-twitter-x social-icon"></i></a>
+                        <a href="#" class="text-decoration-none"><i class="bi bi-instagram social-icon"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

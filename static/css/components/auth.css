@@ -1,0 +1,59 @@
+/* Auth component styles */
+
+/* Authentication form container */
+.auth-container {
+    transition: all 0.3s ease;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Light mode specific styles */
+html[data-bs-theme="light"] .auth-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode specific styles */
+html[data-bs-theme="dark"] .auth-container {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Authentication page heading */
+.auth-header {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+html[data-bs-theme="light"] .auth-header {
+    color: #333;
+}
+
+html[data-bs-theme="dark"] .auth-header {
+    color: var(--body-color);
+}
+
+/* Authentication form submit button */
+.auth-submit {
+    width: 100%;
+    padding: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+/* Additional styling for auth pages */
+.auth-links {
+    text-align: center;
+    margin-top: 20px;
+}
+
+html[data-bs-theme="dark"] .auth-links a {
+    color: var(--primary-light);
+}
+
+html[data-bs-theme="light"] .auth-links a {
+    color: var(--primary-dark);
+}

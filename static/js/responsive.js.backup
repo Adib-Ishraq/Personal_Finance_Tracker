@@ -1,0 +1,226 @@
+// Finance Tracker - Theme and Responsiveness Manager
+// Note: Theme initialization is now handled by global-theme.js
+
+// Mobile detection and responsive helpers
+const FinanceApp = {
+    // Check if device is mobile
+    isMobile: function() {
+        return window.innerWidth < 768;
+    },
+    
+    // Apply mobile-specific adjustments
+    applyMobileStyles: function() {
+        if (this.isMobile()) {
+            // Add mobile-specific classes to elements
+            document.querySelectorAll('.desktop-optimized').forEach(el => {
+                el.classList.add('mobile-optimized');
+            });
+            
+            // Adjust chart options for better mobile display
+            if (typeof Chart !== 'undefined') {
+                Chart.defaults.font.size = 10;
+                Chart.defaults.plugins.legend.position = 'bottom';
+            }
+        } else {
+            // Reset to desktop styles
+            document.querySelectorAll('.mobile-optimized').forEach(el => {
+                el.classList.remove('mobile-optimized');
+            });
+            
+            // Reset chart options for desktop
+            if (typeof Chart !== 'undefined') {
+                Chart.defaults.font.size = 12;
+                Chart.defaults.plugins.legend.position = 'right';
+            }
+        }
+    },
+    
+    // Initialize responsive behaviors
+    initResponsive: function() {
+        // Apply initial styles
+        this.applyMobileStyles();
+        
+        // Listen for window resize
+        window.addEventListener('resize', () => {
+            this.applyMobileStyles();
+        });
+        
+        // Make tables responsive
+        this.makeTablesResponsive();
+    },
+    
+    // Theme management functions
+    themeManager: {
+        // Initialize theme functionality
+        init: function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const lightIcon = document.getElementById('lightIcon');
+            const darkIcon = document.getElementById('darkIcon');
+            const htmlElement = document.documentElement;
+            const themeStatus = document.getElementById('theme-status');
+            const themeModeText = document.getElementById('theme-mode-text');
+            
+            if (!themeToggle) return;
+            
+            // Check saved preference or system preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                this.setTheme(savedTheme);
+            } else {
+                // Check system preference
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const initialTheme = prefersDark ? 'dark' : 'light';
+                this.setTheme(initialTheme);
+            }
+              // Toggle theme on click - using function instead of arrow for proper binding
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = htmlElement.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                // Use the FinanceApp reference to ensure we're accessing the right context
+                FinanceApp.themeManager.setTheme(newTheme);
+                
+                // Show theme change feedback
+                if (themeStatus && themeModeText) {
+                    themeModeText.textContent = newTheme === 'dark' ? 'Dark Mode Enabled' : 'Light Mode Enabled';
+                    themeStatus.style.display = 'block';
+                    themeStatus.style.backgroundColor = newTheme === 'dark' ? '#333' : '#f8f9fa';
+                    themeStatus.style.color = newTheme === 'dark' ? '#fff' : '#333';
+                    
+                    setTimeout(function() {
+                        themeStatus.style.display = 'none';
+                    }, 1500);
+                }
+                
+                // For debugging
+                console.log("Theme toggled to: " + newTheme);
+            });
+              // Listen for system theme changes - using function instead of arrow
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                if (!localStorage.getItem('theme')) {
+                    // Only auto-switch if user hasn't manually set a preference
+                    const newTheme = e.matches ? 'dark' : 'light';
+                    // Use the FinanceApp reference to ensure we're accessing the right context
+                    FinanceApp.themeManager.setTheme(newTheme);
+                }
+            });
+        },
+        
+        // Set theme and update UI
+        setTheme: function(theme) {
+            const htmlElement = document.documentElement;
+            const lightIcon = document.getElementById('lightIcon');
+            const darkIcon = document.getElementById('darkIcon');
+            
+            // Update data attribute
+            htmlElement.setAttribute('data-bs-theme', theme);
+            
+            // Save to localStorage
+            localStorage.setItem('theme', theme);
+            
+            // Update icons
+            if (lightIcon && darkIcon) {
+                if (theme === 'dark') {
+                    lightIcon.classList.add('d-none');
+                    darkIcon.classList.remove('d-none');
+                } else {
+                    lightIcon.classList.remove('d-none');
+                    darkIcon.classList.add('d-none');
+                }
+            }
+            
+            // Update chart colors if Charts.js is loaded
+            this.updateChartColors(theme);
+        },
+        
+        // Adjust chart colors based on theme
+        updateChartColors: function(theme) {
+            if (typeof Chart === 'undefined') return;
+            
+            if (theme === 'dark') {
+                Chart.defaults.color = '#E8EAED';  // Brighter text for dark mode
+                Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.15)';
+                
+                // Update all active charts
+                if (Chart.instances) {
+                    Chart.instances.forEach(chart => {
+                        if (chart.options && chart.options.scales) {
+                            if (chart.options.scales.x) {
+                                chart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.15)';
+                                if (chart.options.scales.x.ticks) {
+                                    chart.options.scales.x.ticks.color = '#E8EAED';
+                                }
+                            }
+                            if (chart.options.scales.y) {
+                                chart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.15)';
+                                if (chart.options.scales.y.ticks) {
+                                    chart.options.scales.y.ticks.color = '#E8EAED';
+                                }
+                            }
+                        }
+                        chart.update();
+                    });
+                }
+            } else {
+                Chart.defaults.color = '#666';
+                Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.1)';
+                
+                // Update all active charts
+                if (Chart.instances) {
+                    Chart.instances.forEach(chart => {
+                        if (chart.options && chart.options.scales) {
+                            if (chart.options.scales.x) {
+                                chart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
+                                if (chart.options.scales.x.ticks) {
+                                    chart.options.scales.x.ticks.color = '#666';
+                                }
+                            }
+                            if (chart.options.scales.y) {
+                                chart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
+                                if (chart.options.scales.y.ticks) {
+                                    chart.options.scales.y.ticks.color = '#666';
+                                }
+                            }
+                        }
+                        chart.update();
+                    });
+                }
+            }
+        }
+    },
+    
+    // Make tables responsive
+    makeTablesResponsive: function() {
+        const tables = document.querySelectorAll('.table-responsive-custom');
+        tables.forEach(table => {
+            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+            
+            // Add data attributes to cells for responsive display
+            table.querySelectorAll('tbody tr').forEach(row => {
+                Array.from(row.querySelectorAll('td')).forEach((cell, i) => {
+                    if (headers[i]) {
+                        cell.setAttribute('data-label', headers[i]);
+                    }
+                });
+            });
+        });
+    }
+};
+
+// Initialize on document load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Finance Tracker: Initializing application...');
+    
+    // Initialize responsive features
+    FinanceApp.initResponsive();
+    
+    // Initialize theme management
+    FinanceApp.themeManager.init();
+    
+    // Check goal reminders if function exists
+    if (typeof checkGoalReminders === 'function') {
+        setTimeout(() => {
+            checkGoalReminders();
+        }, 1000);
+    }
+});
