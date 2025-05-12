@@ -32,7 +32,8 @@ def create_app(config_class=Config):
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
-      # Initialize Flask-Mail
+
+    # Initialize Flask-Mail
     mail = Mail(app)
     
     # Initialize database
@@ -46,7 +47,6 @@ def create_app(config_class=Config):
             # Create tables if they don't exist
             db.create_all()
         except Exception as e:
-            # PostgreSQL connection error
             print(f"Error with PostgreSQL database connection or initialization: {e}")
             print("Please check your PostgreSQL DATABASE_URL environment variable")
             import sys
@@ -68,7 +68,9 @@ def create_app(config_class=Config):
     
     return app
 
+# ✅ Moved outside the main guard
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=Config.DEBUG)
