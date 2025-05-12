@@ -12,8 +12,8 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-secret-key-here'
     
-    # Database connection - PostgreSQL only
-    SQLALCHEMY_DATABASE_URI = get_db_url()
+    # Database connection - Render only
+    SQLALCHEMY_DATABASE_URI =os.getenv('DATABASE_URL') + "?sslmode=require"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Mail settings

@@ -38,20 +38,13 @@ def create_app(config_class=Config):
     
     # Initialize database
     db.init_app(app)
-    with app.app_context():
-        try:
-            # Check connection first
-            connection = db.engine.connect()
-            connection.close()
-            
-            # Create tables if they don't exist
-            db.create_all()
-        except Exception as e:
-            print(f"Error with PostgreSQL database connection or initialization: {e}")
-            print("Please check your PostgreSQL DATABASE_URL environment variable")
-            import sys
-            sys.exit(1)
-
+    with app.app_context():           
+        # Create tables if they don't exist
+        db.create_all()
+        
+        
+        
+    
     # User loader
     @login_manager.user_loader
     def load_user(user_id):
