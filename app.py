@@ -32,8 +32,7 @@ def create_app(config_class=Config):
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
-
-    # Initialize Flask-Mail
+      # Initialize Flask-Mail
     mail = Mail(app)
     
     # Initialize database
