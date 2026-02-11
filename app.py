@@ -52,6 +52,11 @@ def create_app(config_class=Config):
     # Register blueprints
     register_blueprints(app)
     
+    # Health check endpoint for Koyeb
+    @app.route('/_health')
+    def health_check():
+        return 'OK', 200
+    
     # Register custom template filters
     @app.template_filter('month_abbr')
     def month_abbr_filter(month_number):
