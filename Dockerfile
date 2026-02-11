@@ -28,7 +28,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY . .
 
 # Expose port
-EXPOSE 5000
+EXPOSE 8000
 
 # Set the entrypoint
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "120", "wsgi:app"]

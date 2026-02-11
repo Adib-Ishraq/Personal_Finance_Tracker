@@ -12,8 +12,15 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-secret-key-here'
     
-    # Database connection - Render only
-    SQLALCHEMY_DATABASE_URI =os.getenv('DATABASE_URL') + "?sslmode=require"
+    # Database connection - supports Neon, Render, and other PostgreSQL providers
+    _db_url = os.getenv('DATABASE_URL', '')
+    # Handle postgres:// -> postgresql:// (some providers use the old prefix)
+    if _db_url.startswith('postgres://'):
+        _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
+    # Append sslmode if not already present
+    if _db_url and '?sslmode=' not in _db_url and '&sslmode=' not in _db_url:
+        _db_url += '?sslmode=require'
+    SQLALCHEMY_DATABASE_URI = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Mail settings
